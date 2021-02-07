@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title></title>
+        <style>
+            html,body{
+                margin: 0;
+                padding: 0;
+                height: 100%;
+            }
+
+            #road{
+                position: relative;
+                width: 416px;
+                height: 100%;
+                background-image: url(images/straight-road-clipart-1.jpg);
+                background-size: 416px;
+                margin: auto;
+                overflow: hidden;
+            }
+
+            #car{
+                position: absolute;
+                width: 70px;
+                height: 150px;
+                background-image: url(images/car.png);
+                background-size: contain;
+                left: 30px;
+                bottom: 20px;
+            }
+
+            #enemyCar{
+                position: absolute;
+                left: 30px;
+                width: 70px;
+                height: 150px;
+                background-image: url(images/car.png);
+                background-size: contain;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="road">
+            <div id="enemyCar"></div>
+            <div id="car"></div>
+        </div>
+        <script src="js/jquery-3.3.1.min.js"></script>
+        <script>
+
+            setInterval(positionEnemyCar, 1000);
+
+            function positionEnemyCar(){
+                if (tmrEnemy !== -1) return;
+                var lefts = [30,115,225,310];
+                var left = lefts[getRandomInt(4)];
+                $("#enemyCar").css("left",left + "px");
+                playEnemyCar();
+            }
+
+            var tmrEnemy = -1;
+            playEnemyCar();
+
+            function playEnemyCar(){
+                if (tmrEnemy !== -1) return;
+                tmrEnemy = setInterval(function(){
+                    var y = $("#enemyCar").position().top + 10;
+
+                    if (y > $("#road").height()){
+                        clearInterval(tmrEnemy);
+                        tmrEnemy = -1;
+                        $("#enemyCar").css("top", "-150px");
+                        positionEnemyCar();
+                        return;
+                    }
+
+                    $("#enemyCar").css("top",y + "px");
+                },23);
+            }
+
+            function getRandomInt(max) {
+                return Math.floor(Math.random() * Math.floor(max));
+            }
+
+            var tmrAccelerate = -1;
+            var tmrTrun = -1;
+
+            function startAccelerate(reverse){
+                if (tmrAccelerate !== -1) return;
+                tmrAccelerate = setInterval(function(){
+                    var y = 0;
+                    if (!reverse){
+                        y = parseInt($("#road").css("background-position-y").replace(/[%px]/gi,'')) + 10;
+                    }else{
+                        y = parseInt($("#road").css("background-position-y").replace(/[%px]/gi,'')) - 10;
+                    }
+                    $("#road").css("background-position-y",y + "px");
+                },23);
+            }
+
+            function stopAccelerate(){
+                clearInterval(tmrAccelerate);
+                tmrAccelerate = -1;
+            }
+
+            function startTurn(left){
+                if (tmrTrun !== -1 || tmrAccelerate == -1   ) return;
+                tmrTrun = setInterval(function(){
+                    var x = 0;
+                    if (!left){
+                        x = $("#car").position().left + 10;
+                    }else{
+                        x = $("#car").position().left - 10;
+                    }
+                    if (x >= 310) x = 310;
+                    if (x <= 30) x = 30;
+                    $("#car").css("left",x + "px");
+                },23);
+            }
+
+            function stopTurn(){
+                clearInterval(tmrTrun);
+                tmrTrun = -1;
+            }
+
+            $(window).keydown(function(e){
+               switch(e.which){
+                   case 38:
+                       startAccelerate(false);
+                       break;
+                   case 40:
+                       startAccelerate(true);
+                       break;
+                   case 39:
+                       startTurn(false);
+                       break;
+                   case 37:
+                       startTurn(true);
+                       break;
+               }
+            });
+
+            $(window).keyup(function(e){
+                switch(e.which){
+                    case 38:
+                        stopAccelerate();
+                        break;
+                    case 40:
+                        stopAccelerate();
+                        break;
+                    case 39:
+                        stopTurn();
+                        break;
+                    case 37:
+                        stopTurn();
+                        break;
+                }
+            });
+
+        </script>
+    </body>
+</html>
